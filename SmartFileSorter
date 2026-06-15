@@ -1,0 +1,125 @@
+# SmartFileSorter 📂✨
+
+**SmartFileSorter** is a simple yet powerful Python tool that automatically organizes files in a directory into categorized folders based on file type.
+
+## 🚀 Features
+
+* Automatically sorts files into folders:
+
+  * Images
+  * Videos
+  * Documents
+  * Music
+  * Archives
+* Easy to use
+* Lightweight and fast
+* Customizable file categories
+
+## 🛠️ Installation
+
+```bash
+git clone https://github.com/your-username/SmartFileSorter.git
+cd SmartFileSorter
+```
+
+## ▶️ Usage
+
+```bash
+python sorter.py /path/to/your/folder
+```
+
+## 📁 Example
+
+Before:
+
+```
+Downloads/
+  file1.jpg
+  song.mp3
+  doc.pdf
+```
+
+After:
+
+```
+Downloads/
+  Images/
+    file1.jpg
+  Music/
+    song.mp3
+  Documents/
+    doc.pdf
+```
+
+## 🧠 How It Works
+
+The script scans all files in the target directory and moves them into folders based on their file extensions.
+
+## 📦 sorter.py
+
+```python
+import os
+import shutil
+import sys
+
+# File type categories
+FILE_CATEGORIES = {
+    "Images": [".jpg", ".jpeg", ".png", ".gif", ".bmp"],
+    "Videos": [".mp4", ".mkv", ".avi", ".mov"],
+    "Documents": [".pdf", ".docx", ".txt", ".xlsx"],
+    "Music": [".mp3", ".wav", ".aac"],
+    "Archives": [".zip", ".rar", ".tar", ".gz"]
+}
+
+def get_category(file_extension):
+    for category, extensions in FILE_CATEGORIES.items():
+        if file_extension.lower() in extensions:
+            return category
+    return "Others"
+
+def sort_files(directory):
+    if not os.path.isdir(directory):
+        print("Invalid directory!")
+        return
+
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+
+        if os.path.isfile(file_path):
+            _, ext = os.path.splitext(filename)
+            category = get_category(ext)
+
+            category_folder = os.path.join(directory, category)
+            os.makedirs(category_folder, exist_ok=True)
+
+            destination = os.path.join(category_folder, filename)
+            shutil.move(file_path, destination)
+
+            print(f"Moved: {filename} → {category}/")
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python sorter.py <directory>")
+    else:
+        sort_files(sys.argv[1])
+```
+
+## 💡 Future Improvements
+
+* GUI version
+* Duplicate file detection
+* File size filtering
+* Logging system
+
+## 📄 License
+
+MIT License
+
+```
+
+---
+
+اگر بخوای، می‌تونم:
+- براش UI گرافیکی بسازم 🎨  
+- یا یه پروژه خفن‌تر (مثلاً با AI یا وب‌اپ) برات طراحی کنم 🚀
+```
