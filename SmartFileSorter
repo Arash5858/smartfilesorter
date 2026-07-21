@@ -37,19 +37,6 @@ Downloads/
   file1.jpg
   song.mp3
   doc.pdf
-```
-
-After:
-
-```
-Downloads/
-  Images/
-    file1.jpg
-  Music/
-    song.mp3
-  Documents/
-    doc.pdf
-```
 
 ## 🧠 How It Works
 
@@ -88,15 +75,6 @@ def sort_files(directory):
         if os.path.isfile(file_path):
             _, ext = os.path.splitext(filename)
             category = get_category(ext)
-
-            category_folder = os.path.join(directory, category)
-            os.makedirs(category_folder, exist_ok=True)
-
-            destination = os.path.join(category_folder, filename)
-            shutil.move(file_path, destination)
-
-            print(f"Moved: {filename} → {category}/")
-
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python sorter.py <directory>")
@@ -112,14 +90,3 @@ if __name__ == "__main__":
 * Logging system
 
 ## 📄 License
-
-MIT License
-
-```
-
----
-
-اگر بخوای، می‌تونم:
-- براش UI گرافیکی بسازم 🎨  
-- یا یه پروژه خفن‌تر (مثلاً با AI یا وب‌اپ) برات طراحی کنم 🚀
-```
