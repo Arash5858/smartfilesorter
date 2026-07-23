@@ -74,12 +74,6 @@ def sort_files(directory):
 
         if os.path.isfile(file_path):
             _, ext = os.path.splitext(filename)
-            category = get_category(ext)
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python sorter.py <directory>")
-    else:
-        sort_files(sys.argv[1])
 ```
 
 ## 💡 Future Improvements
