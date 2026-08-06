@@ -63,7 +63,9 @@ def get_category(file_extension):
         if file_extension.lower() in extensions:
             return category
     return "Others"
-
+def sort_files(directory):
+    if not os.path.isdir(directory):
+        print("Invalid directory!")
 def sort_files(directory):
     if not os.path.isdir(directory):
         print("Invalid directory!")
