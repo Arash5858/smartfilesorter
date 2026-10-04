@@ -1,0 +1,151 @@
+velin/
+├── velin.py
+├── README.md
+├── requirements.txt
+└── .gitignore
+#!/usr/bin/env python3
+
+import argparse
+import hashlib
+import os
+from pathlib import Path
+from collections import defaultdict
+
+
+CHUNK_SIZE = 1024 * 1024  # 1 MB
+
+
+def calculate_hash(file_path: Path) -> str:
+    """Calculate SHA-256 hash for a file."""
+    sha256 = hashlib.sha256()
+
+    try:
+        with file_path.open("rb") as file:
+            while chunk := file.read(CHUNK_SIZE):
+                sha256.update(chunk)
+
+        return sha256.hexdigest()
+
+    except (PermissionError, OSError):
+        return ""
+
+
+def scan_directory(directory: Path):
+    """Scan a directory recursively and group files by size."""
+    files_by_size = defaultdict(list)
+
+    for root, _, files in os.walk(directory):
+        for filename in files:
+            path = Path(root) / filename
+
+            try:
+                if path.is_file():
+                    files_by_size[path.stat().st_size].append(path)
+            except (PermissionError, OSError):
+                continue
+
+    return files_by_size
+
+
+def find_duplicates(directory: Path):
+    """Find duplicate files using file size and SHA-256."""
+    files_by_size = scan_directory(directory)
+    duplicates = defaultdict(list)
+
+    for size, files in files_by_size.items():
+
+        # A unique file size cannot contain duplicates.
+        if len(files) < 2:
+            continue
+
+        for file_path in files:
+            file_hash = calculate_hash(file_path)
+
+            if file_hash:
+                duplicates[file_hash].append(file_path)
+
+    return {
+        file_hash: files
+        for file_hash, files in duplicates.items()
+        if len(files) > 1
+    }
+
+
+def format_size(size: int) -> str:
+    """Convert bytes into a human-readable format."""
+    units = ["B", "KB", "MB", "GB", "TB"]
+
+    value = float(size)
+
+    for unit in units:
+        if value < 1024:
+            return f"{value:.2f} {unit}"
+        value /= 1024
+
+    return f"{value:.2f} PB"
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Velin - Fast duplicate file finder"
+    )
+
+    parser.add_argument(
+        "directory",
+        nargs="?",
+        default=".",
+        help="Directory to scan (default: current directory)"
+    )
+
+    args = parser.parse_args()
+
+    directory = Path(args.directory).expanduser().resolve()
+
+    if not directory.exists():
+        print(f"Error: directory does not exist: {directory}")
+        return 1
+
+    if not directory.is_dir():
+        print(f"Error: not a directory: {directory}")
+        return 1
+
+    print(f"\nScanning: {directory}\n")
+
+    duplicates = find_duplicates(directory)
+
+    if not duplicates:
+        print("No duplicate files found.")
+        return 0
+
+    duplicate_groups = 0
+    wasted_space = 0
+
+    for index, (file_hash, files) in enumerate(duplicates.items(), 1):
+        duplicate_groups += 1
+
+        try:
+            file_size = files[0].stat().st_size
+        except OSError:
+            file_size = 0
+
+        wasted_space += file_size * (len(files) - 1)
+
+        print(f"Group {index}")
+        print(f"Hash: {file_hash}")
+        print(f"Size: {format_size(file_size)}")
+
+        for file_path in files:
+            print(f"  - {file_path}")
+
+        print()
+
+    print("-" * 60)
+    print(f"Duplicate groups : {duplicate_groups}")
+    print(f"Recoverable space: {format_size(wasted_space)}")
+    print("-" * 60)
+
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
